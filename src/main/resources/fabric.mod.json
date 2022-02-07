@@ -1,38 +1,28 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "dmnperms",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "DmNPerms",
+  "description": "",
   "authors": [
-    "Me!"
+    "DomamaN202"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/Domaman202/DmNPerms",
+    "sources": "https://github.com/Domaman202/DmNPerms"
   },
 
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/modid/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "ru.DmN.perms.Main"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
-  ],
-
-  "depends": {
-    "fabricloader": ">=0.12.12",
-    "fabric": "*",
-    "minecraft": "1.18.x",
-    "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
-  }
+    "dmnperms.mixins.json"
+  ]
 }
