@@ -7,6 +7,7 @@ import net.minecraft.text.LiteralText;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -20,10 +21,7 @@ public class Main implements ModInitializer {
             load();
 
             dispatcher.register(literal("permission_add").then(argument("name", StringArgumentType.word()).then(argument("parent", StringArgumentType.greedyString()).executes(context -> {
-                if (context.getArgument("parent", String.class).equals("#"))
-                    addPermission(context.getArgument("name", String.class), null);
-                else
-                    addPermission(context.getArgument("name", String.class), context.getArgument("parent", String.class));
+                addPermission(context.getArgument("name", String.class), context.getArgument("parent", String.class));
                 save();
                 return 1;
             }))));
@@ -82,7 +80,7 @@ public class Main implements ModInitializer {
                 var src = context.getSource();
                 src.sendFeedback(new LiteralText("§CPerms list:"), false);
                 for (var permission : permissions) {
-                    src.sendFeedback(new LiteralText("§1>").append("§2" + permission.name), false);
+                    src.sendFeedback(new LiteralText("§1>").append("§2" + permission.name + "\n§3<parent>§5" + permission.parent), false);
                     var sb = new StringBuilder();
                     for (var user : permission.players)
                         sb.append("§3<usr>§5").append(user).append('\n');
@@ -102,22 +100,22 @@ public class Main implements ModInitializer {
         permissions.add(new Permission(name, parent));
     }
 
-    public static boolean checkContains(String command, Permission permission) {
-        if (permission.commands.contains(command))
-            return true;
+    public static boolean checkAccess(String command, Permission permission) {
         for (var cmd : permission.commands)
             if (command.startsWith(cmd))
                 return true;
         return false;
     }
 
-    public static boolean checkAccess(String name, Permission permission, ArrayList<Permission> permissions) {
-        if (permission.players.contains(name))
+    public static boolean checkAccess(String user, String command, Permission permission, ArrayList<Permission> permissions, ArrayList<String> blacklist) {
+        if (permission.players.contains(user) && checkAccess(command, permission))
             return true;
-        if (permission.parent != null)
+        if (!Objects.equals(permission.parent, "#"))
             for (var parent : permissions)
-                if (permission.parent.equals(parent.name))
-                    return checkAccess(name, parent, permissions);
+                if (Objects.equals(permission.parent, parent.name) && !blacklist.contains(parent.name)) {
+                    blacklist.add(parent.name);
+                    return checkAccess(user, command, parent, permissions, blacklist);
+                }
         return false;
     }
 

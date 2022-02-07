@@ -8,28 +8,24 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static ru.DmN.perms.Main.*;
+import java.util.ArrayList;
+
+import static ru.DmN.perms.Main.checkAccess;
+import static ru.DmN.perms.Main.permissions;
 
 @Mixin(CommandManager.class)
 public class CommandManagerMixin {
     @Inject(method = "execute", at = @At("HEAD"), cancellable = true)
     public void executeInject(ServerCommandSource commandSource, String command, CallbackInfoReturnable<Integer> cir) {
-        if (commandSource.hasPermissionLevel(4))
-            return;
         try {
-            if (commandSource.getPlayer() != null) {
-                var user = commandSource.getPlayer().getName().asString();
-                var cmd = true;
-                for (var permission : permissions) {
-                    if (checkContains(command, permission))
-                        cmd = false;
-                    if (permission.players.contains(user) || checkAccess(user, permission, permissions))
-                        return;
-                }
-                if (cmd)
+            var user = commandSource.getPlayer().getName().asString();
+            for (var permission : permissions)
+                if (checkAccess(user, command, permission, permissions, new ArrayList<>()))
                     return;
-                commandSource.getPlayer().sendMessage(new LiteralText("§CPermissions error!"), false);
-            } else return;
+            commandSource.getPlayer().sendMessage(new LiteralText("§CPermissions error!"), false);
+        } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+            e.printStackTrace();
+            return;
         } catch (Exception e) {
             e.printStackTrace();
         }
