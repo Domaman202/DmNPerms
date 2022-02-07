@@ -8,8 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static ru.DmN.perms.Main.checkAccess;
-import static ru.DmN.perms.Main.permissions;
+import static ru.DmN.perms.Main.*;
 
 @Mixin(CommandManager.class)
 public class CommandManagerMixin {
@@ -22,7 +21,7 @@ public class CommandManagerMixin {
                 var user = commandSource.getPlayer().getName().asString();
                 var cmd = true;
                 for (var permission : permissions) {
-                    if (permission.commands.contains(command))
+                    if (checkContains(command, permission))
                         cmd = false;
                     if (permission.players.contains(user) || checkAccess(user, permission, permissions))
                         return;

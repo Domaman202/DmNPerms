@@ -6,8 +6,6 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.UUID;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -17,13 +15,14 @@ public class Main implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        permissions.add(new Permission("_", null));
-
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             load();
 
             dispatcher.register(literal("permission_add").then(argument("name", StringArgumentType.word()).then(argument("parent", StringArgumentType.word()).executes(context -> {
-                permissions.add(new Permission(context.getArgument("name", String.class), context.getArgument("parent", String.class)));
+                if (context.getArgument("parent", String.class).equals("#"))
+                    permissions.add(new Permission(context.getArgument("name", String.class), null));
+                else
+                    permissions.add(new Permission(context.getArgument("name", String.class), context.getArgument("parent", String.class)));
                 save();
                 return 1;
             }))));
@@ -78,6 +77,15 @@ public class Main implements ModInitializer {
                 return 1;
             }))));
         });
+    }
+
+    public static boolean checkContains(String command, Permission permission) {
+        if (permission.commands.contains(command))
+            return true;
+        for (var cmd : permission.commands)
+            if (command.startsWith(cmd))
+                return true;
+        return false;
     }
 
     public static boolean checkAccess(String name, Permission permission, ArrayList<Permission> permissions) {
