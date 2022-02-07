@@ -3,6 +3,7 @@ package ru.DmN.perms;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.text.LiteralText;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -18,11 +19,11 @@ public class Main implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             load();
 
-            dispatcher.register(literal("permission_add").then(argument("name", StringArgumentType.word()).then(argument("parent", StringArgumentType.word()).executes(context -> {
+            dispatcher.register(literal("permission_add").then(argument("name", StringArgumentType.word()).then(argument("parent", StringArgumentType.greedyString()).executes(context -> {
                 if (context.getArgument("parent", String.class).equals("#"))
-                    permissions.add(new Permission(context.getArgument("name", String.class), null));
+                    addPermission(context.getArgument("name", String.class), null);
                 else
-                    permissions.add(new Permission(context.getArgument("name", String.class), context.getArgument("parent", String.class)));
+                    addPermission(context.getArgument("name", String.class), context.getArgument("parent", String.class));
                 save();
                 return 1;
             }))));
@@ -76,7 +77,29 @@ public class Main implements ModInitializer {
                 save();
                 return 1;
             }))));
+
+            dispatcher.register(literal("permission_list").executes(context -> {
+                var src = context.getSource();
+                src.sendFeedback(new LiteralText("§CPerms list:"), false);
+                for (var permission : permissions) {
+                    src.sendFeedback(new LiteralText("§1>").append("§2" + permission.name), false);
+                    var sb = new StringBuilder();
+                    for (var user : permission.players)
+                        sb.append("§3<usr>§5").append(user).append('\n');
+                    for (var cmd : permission.commands)
+                        sb.append("§3<cmd>§6").append(cmd).append('\n');
+                    src.sendFeedback(new LiteralText(sb.toString()), false);
+                }
+                return 1;
+            }));
         });
+    }
+
+    public static void addPermission(String name, String parent) {
+        for (var permission : permissions)
+            if (permission.name.equals(name))
+                return;
+        permissions.add(new Permission(name, parent));
     }
 
     public static boolean checkContains(String command, Permission permission) {

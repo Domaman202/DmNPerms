@@ -4,7 +4,8 @@
   "package": "ru.DmN.perms.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "CommandManagerMixin"
+    "CommandManagerMixin",
+    "ServerCommandSourceMixin"
   ],
   "injectors": {
     "defaultRequire": 1
