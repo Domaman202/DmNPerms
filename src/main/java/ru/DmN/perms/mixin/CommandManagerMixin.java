@@ -24,7 +24,6 @@ public class CommandManagerMixin {
                     return;
             commandSource.getPlayer().sendMessage(new LiteralText("§CPermissions error!"), false);
         } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
-            e.printStackTrace();
             return;
         } catch (Exception e) {
             e.printStackTrace();
