@@ -7,13 +7,15 @@ import net.minecraft.text.LiteralText;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class Main implements ModInitializer {
-    public static ArrayList<Permission> permissions = new ArrayList<>();
+    public static Set<Permission> permissions = new LinkedHashSet<>();
 
     @Override
     public void onInitialize() {
@@ -107,7 +109,7 @@ public class Main implements ModInitializer {
         return false;
     }
 
-    public static boolean checkAccess(String user, String command, Permission permission, ArrayList<Permission> permissions, ArrayList<String> blacklist) {
+    public static boolean checkAccess(String user, String command, Permission permission, Set<Permission> permissions, ArrayList<String> blacklist) {
         if (permission.players.contains(user) && checkAccess(command, permission))
             return true;
         if (!Objects.equals(permission.parent, "#"))
@@ -129,7 +131,7 @@ public class Main implements ModInitializer {
 
     public static void load() {
         try (var file = new ObjectInputStream(new FileInputStream("perms_hash.data"))) {
-            permissions = (ArrayList<Permission>) file.readObject();
+            permissions = (LinkedHashSet<Permission>) file.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
