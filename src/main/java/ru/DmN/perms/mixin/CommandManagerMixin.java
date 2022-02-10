@@ -22,6 +22,8 @@ public class CommandManagerMixin {
             for (var permission : permissions)
                 if (checkAccess(user, command, permission, permissions, new ArrayList<>()))
                     return;
+            if (commandSource.getServer().isSingleplayer())
+                return;
             commandSource.getPlayer().sendMessage(new LiteralText("§CPermissions error!"), false);
         } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
             return;
